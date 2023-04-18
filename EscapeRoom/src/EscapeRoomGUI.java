@@ -3,11 +3,12 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.ImageIcon;
 
-
 public class EscapeRoomGUI extends JFrame {
-    private JPanel gamePanel;
+    private JLayeredPane gamePanel;
     private JLabel playerLabel;
     private JLabel doorLabel;
+
+    private JLabel wallLabel;
     private JLabel obstacleLabel;
 
     private int playerX;
@@ -15,62 +16,75 @@ public class EscapeRoomGUI extends JFrame {
 
     public EscapeRoomGUI() {
         // Set up the game panel
-        gamePanel = new JPanel();
+        gamePanel = new JLayeredPane(); // initialize as JLayeredPane
         gamePanel.setLayout(null);
         gamePanel.setPreferredSize(new Dimension(400, 400));
         gamePanel.setBackground(Color.WHITE); // add a background color to make the wall components more visible
-        add(gamePanel);
+        setContentPane(gamePanel); // add the JLayeredPane as the content pane
 
         // Set up the player label
-
         ImageIcon playerIcon = new ImageIcon("player.gif");
         Image playerImage = playerIcon.getImage().getScaledInstance(40, 40, Image.SCALE_DEFAULT);
         playerIcon = new ImageIcon(playerImage);
         playerLabel = new JLabel(playerIcon);
         playerX = 180;
-        playerY = 360;
+        playerY = 320;
         playerLabel.setBounds(playerX, playerY, 40, 40);
-        gamePanel.add(playerLabel);
+        gamePanel.add(playerLabel, JLayeredPane.DEFAULT_LAYER);
 
 
 
-
-        // Add a border of wall images around the game panel
-        ImageIcon wallIcon = new ImageIcon("walls.jpg");
-        JLabel topWall = new JLabel(wallIcon);
-        topWall.setBounds(0, 0, gamePanel.getWidth(), wallIcon.getIconHeight());
-        gamePanel.add(topWall);
-        gamePanel.setComponentZOrder(topWall, 0);
+        // Set up the wall icon
+        ImageIcon wallIcon = new ImageIcon("Wall.jpg");
+        //setting up Top wall Right.
+        JLabel topWallR = new JLabel(wallIcon);
+        topWallR.setBounds(220, 0, 200, 40);
+        gamePanel.add(topWallR, JLayeredPane.DEFAULT_LAYER);
+        //setting up Top wall Left.
+        JLabel topWallL = new JLabel(wallIcon);
+        topWallL.setBounds(0,0, 180, 40);
+        gamePanel.add(topWallL, JLayeredPane.DEFAULT_LAYER);
+        //setting up left wall.
         JLabel leftWall = new JLabel(wallIcon);
-        leftWall.setBounds(0, 0, wallIcon.getIconWidth(), gamePanel.getHeight());
-        gamePanel.add(leftWall);
-        gamePanel.setComponentZOrder(leftWall, 0);
+        leftWall.setBounds(0,0, 40, 310);
+        gamePanel.add(leftWall, JLayeredPane.DEFAULT_LAYER);
+        //setting up left wall2.
+        JLabel leftWall2 = new JLabel(wallIcon);
+        leftWall2.setBounds(0,200, 40, 310);
+        gamePanel.add(leftWall2, JLayeredPane.DEFAULT_LAYER);
+        //setting up right wall.
         JLabel rightWall = new JLabel(wallIcon);
-        rightWall.setBounds(gamePanel.getWidth() - wallIcon.getIconWidth(), 0, wallIcon.getIconWidth(), gamePanel.getHeight());
-        gamePanel.add(rightWall);
-        gamePanel.setComponentZOrder(rightWall, 0);
+        rightWall.setBounds(360,0, 40, 310);
+        gamePanel.add(rightWall, JLayeredPane.DEFAULT_LAYER);
+        //setting up right wall2.
+        JLabel rightWall2 = new JLabel(wallIcon);
+        rightWall2.setBounds(360,200, 40, 310);
+        gamePanel.add(rightWall2, JLayeredPane.DEFAULT_LAYER);
+
+        //setting up Bottom wall.
         JLabel bottomWall = new JLabel(wallIcon);
-        bottomWall.setBounds(0, gamePanel.getHeight() - wallIcon.getIconHeight(), gamePanel.getWidth(), wallIcon.getIconHeight());
-        gamePanel.add(bottomWall);
-        gamePanel.setComponentZOrder(bottomWall, 0);
+        bottomWall .setBounds(0,360, 280, 40);
+        gamePanel.add(bottomWall, JLayeredPane.DEFAULT_LAYER);
+        //setting up Bottom Wall2.
+        JLabel bottomWall2 = new JLabel(wallIcon);
+        bottomWall2 .setBounds(215,360, 280, 40);
+        gamePanel.add(bottomWall2, JLayeredPane.DEFAULT_LAYER);
+
 
 
 
         // Set up the door label
         doorLabel = new JLabel(new ImageIcon("door.png"));
-        doorLabel.setBounds(180, 20, 40, 40);
-        gamePanel.add(doorLabel);
-
-
+        doorLabel.setBounds(180, 0, 40, 40);
+        gamePanel.add(doorLabel, JLayeredPane.DEFAULT_LAYER);
 
         // Set up the obstacle label
         ImageIcon obstacleIcon = new ImageIcon("Enemy.png");
         Image obstacleImage = obstacleIcon.getImage().getScaledInstance(40, 40, Image.SCALE_DEFAULT);
         obstacleIcon = new ImageIcon(obstacleImage);
         obstacleLabel = new JLabel(obstacleIcon);
-        obstacleLabel.setBounds(20, 100, 40, 40);
-        gamePanel.add(obstacleLabel);
-
+        obstacleLabel.setBounds(120, 100, 40, 40);
+        gamePanel.add(obstacleLabel, JLayeredPane.DEFAULT_LAYER);
 
 
         // Set up the key listener to move the player
