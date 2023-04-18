@@ -71,11 +71,9 @@ public class EscapeRoomGUI extends JFrame {
         gamePanel.add(bottomWall2, JLayeredPane.DEFAULT_LAYER);
 
 
-
-
         // Set up the door label
         doorLabel = new JLabel(new ImageIcon("door.png"));
-        doorLabel.setBounds(180, 0, 40, 40);
+        doorLabel.setBounds(180, 0, 40, 50);
         gamePanel.add(doorLabel, JLayeredPane.DEFAULT_LAYER);
 
         // Set up the obstacle label
@@ -85,6 +83,30 @@ public class EscapeRoomGUI extends JFrame {
         obstacleLabel = new JLabel(obstacleIcon);
         obstacleLabel.setBounds(120, 100, 40, 40);
         gamePanel.add(obstacleLabel, JLayeredPane.DEFAULT_LAYER);
+
+        // Set up a timer to move the obstacle every 2 seconds
+        Timer timer = new Timer(200, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Generate a random direction
+                int direction = (int) (Math.random() * 4);
+                int deltaX = 0;
+                int deltaY = 0;
+                switch (direction) {
+                    case 0: deltaX = 10; break;  // move right
+                    case 1: deltaX = -10; break; // move left
+                    case 2: deltaY = 10; break;  // move down
+                    case 3: deltaY = -10; break; // move up
+                }
+                // Move the obstacle to the new position
+                int obstacleX = obstacleLabel.getX() + deltaX;
+                int obstacleY = obstacleLabel.getY() + deltaY;
+                obstacleLabel.setBounds(obstacleX, obstacleY, 40, 40);
+                // Check for collisions with walls and the player
+                checkCollisions();
+            }
+        });
+        timer.start();
+
 
 
         // Set up the key listener to move the player
@@ -129,9 +151,23 @@ public class EscapeRoomGUI extends JFrame {
         int playerHeight = playerImage.getHeight(null);
 
         // Check if the new player position is within the game panel boundaries
-        if (playerX >= 0 && playerX <= gamePanel.getWidth() - playerWidth && playerY >= 0 && playerY <= gamePanel.getHeight() - playerHeight) {
-            // Set the new position of the player label
-            playerLabel.setBounds(playerX, playerY, playerWidth, playerHeight);
+        if (playerX >= 40 && playerX <= gamePanel.getWidth() - playerWidth - 40 && playerY >= 40 && playerY <= gamePanel.getHeight() - playerHeight - 40) {
+            // Check if the new player position is inside the wall area
+            boolean insideWall = false;
+            for (Component c : gamePanel.getComponents()) {
+                if (c instanceof JLabel && ((JLabel) c).getIcon() != null && ((JLabel) c).getIcon().toString().contains("Wall.jpg") && c.getBounds().intersects(playerX, playerY, playerWidth, playerHeight)) {
+                    insideWall = true;
+                    break;
+                }
+            }
+            if (!insideWall) {
+                // Set the new position of the player label
+                playerLabel.setBounds(playerX, playerY, playerWidth, playerHeight);
+            } else {
+                // If the new position is inside a wall, revert to the old position
+                playerX = oldPlayerX;
+                playerY = oldPlayerY;
+            }
         } else {
             // If the new position is out of bounds, revert to the old position
             playerX = oldPlayerX;
@@ -141,6 +177,7 @@ public class EscapeRoomGUI extends JFrame {
         // Check for collisions with obstacles and the door
         checkCollisions();
     }
+
     private void checkCollisions() {
         // Get the non-transparent bounds of the player sprite
         Rectangle playerBounds = playerLabel.getBounds();
@@ -148,10 +185,17 @@ public class EscapeRoomGUI extends JFrame {
 
         // Check for collisions with the obstacle sprite
         Rectangle obstacleBounds = obstacleLabel.getBounds();
-        if (playerBounds.intersects(obstacleBounds)) {
-            JOptionPane.showMessageDialog(this, "You hit an obstacle!");
+        boolean obstacleInsideWall = false;
+        for (Component c : gamePanel.getComponents()) {
+            if (c instanceof JLabel && ((JLabel) c).getIcon() != null && ((JLabel) c).getIcon().toString().contains("Wall.jpg") && c.getBounds().intersects(obstacleBounds)) {
+                obstacleInsideWall = true;
+                break;
+            }
+        }
+        if (playerBounds.intersects(obstacleBounds) && !obstacleInsideWall) {
+            JOptionPane.showMessageDialog(this, "You hit an enemy!");
             playerX = 180;
-            playerY = 360;
+            playerY = 320;
             playerLabel.setBounds(playerX, playerY, 40, 40);
             return;
         }
@@ -162,6 +206,8 @@ public class EscapeRoomGUI extends JFrame {
             JOptionPane.showMessageDialog(this, "You escaped!");
             System.exit(0);
         }
+
+
     }
 
 
