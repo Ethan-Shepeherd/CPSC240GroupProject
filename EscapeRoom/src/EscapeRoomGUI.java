@@ -84,28 +84,7 @@ public class EscapeRoomGUI extends JFrame {
         obstacleLabel.setBounds(120, 100, 40, 40);
         gamePanel.add(obstacleLabel, JLayeredPane.DEFAULT_LAYER);
 
-        /*// Set up a timer to move the obstacle every 2 seconds
-        Timer timer = new Timer(200, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                // Generate a random direction
-                int direction = (int) (Math.random() * 4);
-                int deltaX = 0;
-                int deltaY = 0;
-                switch (direction) {
-                    case 0: deltaX = 10; break;  // move right
-                    case 1: deltaX = -10; break; // move left
-                    case 2: deltaY = 10; break;  // move down
-                    case 3: deltaY = -10; break; // move up
-                }
-                // Move the obstacle to the new position
-                int obstacleX = obstacleLabel.getX() + deltaX;
-                int obstacleY = obstacleLabel.getY() + deltaY;
-                obstacleLabel.setBounds(obstacleX, obstacleY, 40, 40);
-                // Check for collisions with walls and the player
-                checkCollisions();
-            }
-        });
-        timer.start();*/
+
         // Set up a timer to move the obstacle every 2 seconds
         Timer timer = new Timer(200, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -225,38 +204,6 @@ public class EscapeRoomGUI extends JFrame {
 
 
 
-
-    /*private void checkCollisions() {
-        // Get the non-transparent bounds of the player sprite
-        Rectangle playerBounds = playerLabel.getBounds();
-        playerBounds.setLocation(playerX, playerY);
-
-        // Check for collisions with the obstacle sprite
-        Rectangle obstacleBounds = obstacleLabel.getBounds();
-        boolean obstacleInsideWall = false;
-        for (Component c : gamePanel.getComponents()) {
-            if (c instanceof JLabel && ((JLabel) c).getIcon() != null && ((JLabel) c).getIcon().toString().contains("Wall.jpg") && c.getBounds().intersects(obstacleBounds)) {
-                obstacleInsideWall = true;
-                break;
-            }
-        }
-        if (playerBounds.intersects(obstacleBounds) && !obstacleInsideWall) {
-            JOptionPane.showMessageDialog(this, "You hit an enemy!");
-            playerX = 180;
-            playerY = 320;
-            playerLabel.setBounds(playerX, playerY, 40, 40);
-            return;
-        }
-
-        // Check for collisions with the door sprite
-        Rectangle doorBounds = doorLabel.getBounds();
-        if (playerBounds.intersects(doorBounds)) {
-            JOptionPane.showMessageDialog(this, "You escaped!");
-            System.exit(0);
-        }
-
-
-    }*/
     private void checkCollisions() {
         // Get the non-transparent bounds of the player sprite
         Rectangle playerBounds = playerLabel.getBounds();
