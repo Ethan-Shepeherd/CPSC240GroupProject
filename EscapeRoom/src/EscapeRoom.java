@@ -1,3 +1,4 @@
+//Ethan Shepherd
 import javax.swing.*;
 
 public class EscapeRoom {
