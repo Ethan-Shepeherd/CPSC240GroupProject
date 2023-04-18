@@ -1,2 +1,4 @@
-public class GameStatus {
+public enum GameStatus {
+    ACTIVE, PAUSED, END
 }
+
