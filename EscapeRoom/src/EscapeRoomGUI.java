@@ -9,11 +9,124 @@ public class EscapeRoomGUI extends JFrame {
     private JLabel doorLabel;
 
     private JLabel obstacleLabel;
+    private JLabel obstacleLabel2;
 
     private int playerX;
     private int playerY;
+    private Timer t1, t2;
+    private int level = 1;
+    private int t_sec = 1500;
 
     public EscapeRoomGUI() {
+
+        panelSetup();
+        moveListenr();
+
+        // Set up the window
+        setTitle("Escape Room");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setContentPane(gamePanel);
+        pack();
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
+
+    private void moveListenr(){
+        // Set up the key listener to move the player
+
+        gamePanel.setFocusable(true);
+        gamePanel.requestFocusInWindow();
+        gamePanel.addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent e) {
+                int keyCode = e.getKeyCode();
+                if (keyCode == KeyEvent.VK_LEFT) {
+                    try {
+                        movePlayer(-10, 0);
+                    } catch (InterruptedException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                } else if (keyCode == KeyEvent.VK_RIGHT) {
+                    try {
+                        movePlayer(10, 0);
+                    } catch (InterruptedException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                } else if (keyCode == KeyEvent.VK_UP) {
+                    try {
+                        movePlayer(0, -10);
+                    } catch (InterruptedException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                } else if (keyCode == KeyEvent.VK_DOWN) {
+                    try {
+                        movePlayer(0, 10);
+                    } catch (InterruptedException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        });
+        gamePanel.setFocusable(true);
+    }
+
+    private void setTimer(Timer timer, JLabel obj_enm, Integer sec){
+        if(timer != null)
+            timer.stop();
+        // Set up a timer to move the obstacle every 2 seconds
+        timer = new Timer(t_sec, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Generate a random direction
+                int direction = (int) (Math.random() * 4);
+                int deltaX = 0;
+                int deltaY = 0;
+                switch (direction) {
+                    case 0:
+                        deltaX = 10;
+                        break;  // move right
+                    case 1:
+                        deltaX = -10;
+                        break; // move left
+                    case 2:
+                        deltaY = 10;
+                        break;  // move down
+                    case 3:
+                        deltaY = -10;
+                        break; // move up
+                }
+
+                // Check if the new obstacle position intersects with any wall images
+                boolean insideWall = false;
+                for (Component c : gamePanel.getComponents()) {
+                    if (c instanceof JLabel && ((JLabel) c).getIcon() != null && ((JLabel) c).getIcon().toString().contains("Wall.jpg")) {
+                        Rectangle wallBounds = c.getBounds();
+                        Rectangle obstacleBounds = obj_enm.getBounds();
+                        obstacleBounds.translate(deltaX, deltaY);
+                        if (obstacleBounds.intersects(wallBounds)) {
+                            insideWall = true;
+                            break;
+                        }
+                    }
+                }
+
+                // Move the obstacle to the new position if it doesn't intersect with any walls
+                if (!insideWall) {
+                    int obstacleX = obj_enm.getX() + deltaX;
+                    int obstacleY = obj_enm.getY() + deltaY;
+                    obj_enm.setBounds(obstacleX, obstacleY, 40, 40);
+                }
+
+                // Check for collisions with walls and the player
+                try {
+                    checkCollisions(obj_enm);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+        timer.start();
+    }
+
+    private void panelSetup(){
         // Set up the game panel
         gamePanel = new JLayeredPane(); // initialize as JLayeredPane
         gamePanel.setLayout(null);
@@ -27,6 +140,7 @@ public class EscapeRoomGUI extends JFrame {
         Image playerImage = playerIcon.getImage().getScaledInstance(40, 40, Image.SCALE_DEFAULT);
         playerIcon = new ImageIcon(playerImage);
         playerLabel = new JLabel(playerIcon);
+        playerLabel.setName("player1");
         playerX = 180;
         playerY = 320;
         playerLabel.setBounds(playerX, playerY, 40, 40);
@@ -82,114 +196,18 @@ public class EscapeRoomGUI extends JFrame {
         obstacleLabel = new JLabel(obstacleIcon);
         obstacleLabel.setBounds(120, 100, 40, 40);
         gamePanel.add(obstacleLabel, JLayeredPane.DEFAULT_LAYER);
+        setTimer(t1, obstacleLabel, t_sec);
 
         // Set up the obstacle label 2
+
         ImageIcon obstacleIcon2 = new ImageIcon("Enemy2.png");
         Image obstacleImage2 = obstacleIcon2.getImage().getScaledInstance(40, 40, Image.SCALE_DEFAULT);
         obstacleIcon2 = new ImageIcon(obstacleImage2);
-        obstacleLabel = new JLabel(obstacleIcon2);
-        obstacleLabel.setBounds(220, 200, 40, 40);
-        gamePanel.add(obstacleLabel, JLayeredPane.DEFAULT_LAYER);
-
-        // Set up a timer to move the obstacle every 2 seconds
-        Timer timer = new Timer(200, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                // Generate a random direction
-                int direction = (int) (Math.random() * 4);
-                int deltaX = 0;
-                int deltaY = 0;
-                switch (direction) {
-                    case 0:
-                        deltaX = 10;
-                        break;  // move right
-                    case 1:
-                        deltaX = -10;
-                        break; // move left
-                    case 2:
-                        deltaY = 10;
-                        break;  // move down
-                    case 3:
-                        deltaY = -10;
-                        break; // move up
-                }
-
-                // Check if the new obstacle position intersects with any wall images
-                boolean insideWall = false;
-                for (Component c : gamePanel.getComponents()) {
-                    if (c instanceof JLabel && ((JLabel) c).getIcon() != null && ((JLabel) c).getIcon().toString().contains("Wall.jpg")) {
-                        Rectangle wallBounds = c.getBounds();
-                        Rectangle obstacleBounds = obstacleLabel.getBounds();
-                        obstacleBounds.translate(deltaX, deltaY);
-                        if (obstacleBounds.intersects(wallBounds)) {
-                            insideWall = true;
-                            break;
-                        }
-                    }
-                }
-
-                // Move the obstacle to the new position if it doesn't intersect with any walls
-                if (!insideWall) {
-                    int obstacleX = obstacleLabel.getX() + deltaX;
-                    int obstacleY = obstacleLabel.getY() + deltaY;
-                    obstacleLabel.setBounds(obstacleX, obstacleY, 40, 40);
-                }
-
-                // Check for collisions with walls and the player
-                try {
-                    checkCollisions();
-                } catch (InterruptedException ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        });
-        timer.start();
-
-
-        // Set up the key listener to move the player
-
-        gamePanel.setFocusable(true);
-        gamePanel.requestFocusInWindow();
-        gamePanel.addKeyListener(new KeyAdapter() {
-            public void keyPressed(KeyEvent e) {
-                int keyCode = e.getKeyCode();
-                if (keyCode == KeyEvent.VK_LEFT) {
-                    try {
-                        movePlayer(-10, 0);
-                    } catch (InterruptedException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                } else if (keyCode == KeyEvent.VK_RIGHT) {
-                    try {
-                        movePlayer(10, 0);
-                    } catch (InterruptedException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                } else if (keyCode == KeyEvent.VK_UP) {
-                    try {
-                        movePlayer(0, -10);
-                    } catch (InterruptedException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                } else if (keyCode == KeyEvent.VK_DOWN) {
-                    try {
-                        movePlayer(0, 10);
-                    } catch (InterruptedException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                }
-            }
-        });
-        gamePanel.setFocusable(true);
-
-        // Set up the window
-        setTitle("Escape Room");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setContentPane(gamePanel);
-        pack();
-        setLocationRelativeTo(null);
-        setVisible(true);
+        obstacleLabel2 = new JLabel(obstacleIcon2);
+        obstacleLabel2.setBounds(220, 200, 40, 40);
+        gamePanel.add(obstacleLabel2, JLayeredPane.DEFAULT_LAYER);
+        setTimer(t2, obstacleLabel2, t_sec);
     }
-
 
     private void movePlayer(int deltaX, int deltaY) throws InterruptedException {
         // Get the current player position
@@ -230,19 +248,26 @@ public class EscapeRoomGUI extends JFrame {
         }
 
         // Check for collisions with obstacles and the door
-        checkCollisions();
+        checkCollisions(playerLabel);
     }
 
+    public int getLevel() {
+        return level;
+    }
 
-    private void checkCollisions() throws InterruptedException {
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
+    private void checkCollisions(JLabel moving_obj) throws InterruptedException {
         // Get the non-transparent bounds of the player sprite
         Rectangle playerBounds = playerLabel.getBounds();
-        playerBounds.setLocation(playerX, playerY);
+        //playerBounds.setLocation(playerX, playerY);
 
         // Check for collisions with the obstacle sprite
-        Rectangle obstacleBounds = obstacleLabel.getBounds();
-        int deltaX = obstacleBounds.x - obstacleLabel.getX();
-        int deltaY = obstacleBounds.y - obstacleLabel.getY();
+        Rectangle obstacleBounds = moving_obj.getBounds();
+        int deltaX = obstacleBounds.x - moving_obj.getX();
+        int deltaY = obstacleBounds.y - moving_obj.getY();
         boolean obstacleInsideWall = false;
         for (Component c : gamePanel.getComponents()) {
             if (c instanceof JLabel && ((JLabel) c).getIcon() != null && ((JLabel) c).getIcon().toString().contains("Wall.jpg") && c.getBounds().intersects(obstacleBounds)) {
@@ -250,31 +275,41 @@ public class EscapeRoomGUI extends JFrame {
                 break;
             }
         }
-        if (playerBounds.intersects(obstacleBounds) && !obstacleInsideWall) {
+        
+        if (playerBounds.intersects(obstacleBounds) && !obstacleInsideWall && moving_obj.getName() != "player1") {
             JOptionPane.showMessageDialog(this, "You hit an enemy!");
             playerX = 180;
             playerY = 320;
             playerLabel.setBounds(playerX, playerY, 40, 40);
+            obstacleLabel.setBounds(120, 100, 40, 40);
+            obstacleLabel2.setBounds(220, 200, 40, 40);
+            t_sec = 1500;
+            level = 1;
             return;
         }
 
         // Check for collisions with the door sprite
         Rectangle doorBounds = doorLabel.getBounds();
-        if (playerBounds.intersects(doorBounds)) {
-            JOptionPane.showMessageDialog(this, "Level 1 Complete");
+        if (playerBounds.intersects(doorBounds) && moving_obj.getName() == "player1") {
+            JOptionPane.showMessageDialog(this, "Level " + level + " Complete");
             GameStatus status = GameStatus.PAUSED;
             transitionToNextLevel();
+            level++;
+            t_sec = t_sec-300;
+            if(t_sec < 500)
+                t_sec = 200;
         }
     }
     private void transitionToNextLevel() {
         // Update the panel for the next level
         gamePanel.removeAll();
         gamePanel.setLayout(new FlowLayout());
-        JLabel level2Label = new JLabel("Level 2");
+        JLabel level2Label = new JLabel("Level " + Integer.toString(getLevel()));
         gamePanel.add(level2Label);
-        gamePanel.revalidate(); // Refresh the panel
-        gamePanel.
-        repaint();
-        setBackground(Color.WHITE);
+        gamePanel.revalidate();// Refresh the panel
+        panelSetup();
+        setTimer(t1, obstacleLabel, t_sec);
+        setTimer(t2, obstacleLabel2, t_sec);
+        moveListenr();
     }
 }
