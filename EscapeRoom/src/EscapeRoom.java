@@ -6,7 +6,7 @@ public class EscapeRoom {
         // Start the GUI
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                new EscapeRoomGUI();
+                new EscapeRoomFinal();
             }
         });
     }
